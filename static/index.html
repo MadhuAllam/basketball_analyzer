@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Vision Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B00;
+            --primary-hover: #FF8533;
+            --bg: #0D0D0E;
+            --card-bg: #1A1A1C;
+            --text: #F0F0F2;
+            --text-dim: #94949C;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Subtle Background Glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(circle, rgba(255, 107, 0, 0.05) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        header {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #FFF, #BCBCBC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        /* UPLOAD STATE */
+        .upload-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            cursor: pointer;
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 4rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: var(--glass);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.3));
+        }
+
+        .upload-text h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text p {
+            color: var(--text-dim);
+        }
+
+        #file-input { display: none; }
+
+        /* BUTTONS */
+        .btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 0, 0.2);
+        }
+
+        .btn:disabled {
+            background: var(--text-dim);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* PROGRESS STATE */
+        #progress-area {
+            display: none;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50px;
+            margin: 2rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #FFAD66);
+            width: 0%;
+            border-radius: 50px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .percentage {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .status-msg {
+            color: var(--text-dim);
+            font-size: 1rem;
+        }
+
+        /* RESULT STATE */
+        #result-area {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: slideUp 0.6s ease;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 12px;
+            background: #000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: var(--glass);
+            border-color: var(--text);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2rem; }
+            .card { padding: 1.5rem; }
+            .actions { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <header>
+            <h1>Basketball Vision</h1>
+            <p>Smart Tactical Video Analysis</p>
+        </header>
+
+        <div class="card">
+            <!-- STEP 1: UPLOAD -->
+            <div id="upload-area">
+                <label for="file-input" class="upload-zone" id="drop-zone">
+                    <div class="upload-icon">🏀</div>
+                    <div class="upload-text">
+                        <h3 id="file-name-label">Choose a video file</h3>
+                        <p>Drag and drop or click to upload</p>
+                    </div>
+                </label>
+                <input type="file" id="file-input" accept="video/*">
+                <button id="process-btn" class="btn" style="margin-top: 2rem;" disabled>Process Basketball Video</button>
+            </div>
+
+            <!-- STEP 2: PROGRESS -->
+            <div id="progress-area">
+                <div class="percentage" id="perc-text">0%</div>
+                <div class="status-msg" id="msg-text">Preparing analysis...</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="bar-fill"></div>
+                </div>
+            </div>
+
+            <!-- STEP 3: RESULT -->
+            <div id="result-area">
+                <video id="player" controls playsinline></video>
+                <div class="actions">
+                    <a id="download-btn" class="btn">
+                        <span>Download Result</span>
+                    </a>
+                    <button class="btn btn-outline" onclick="location.reload()">Start New</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const processBtn = document.getElementById('process-btn');
+        const uploadArea = document.getElementById('upload-area');
+        const progressArea = document.getElementById('progress-area');
+        const resultArea = document.getElementById('result-area');
+        const fileNameLabel = document.getElementById('file-name-label');
+        const barFill = document.getElementById('bar-fill');
+        const percText = document.getElementById('perc-text');
+        const msgText = document.getElementById('msg-text');
+        const player = document.getElementById('player');
+        const downloadBtn = document.getElementById('download-btn');
+
+        let taskId = null;
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameLabel.textContent = e.target.files[0].name;
+                processBtn.disabled = false;
+            }
+        });
+
+        processBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Transition to Progress
+            uploadArea.style.display = 'none';
+            progressArea.style.display = 'block';
+
+            // Upload
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                taskId = data.task_id;
+                
+                // Start status polling
+                pollStatus();
+            } catch (err) {
+                msgText.textContent = "Error uploading file. Please try again.";
+                msgText.style.color = "#ff4444";
+            }
+        });
+
+        async function pollStatus() {
+            if (!taskId) return;
+
+            try {
+                const res = await fetch(`/status/${taskId}`);
+                const status = await res.json();
+
+                barFill.style.width = status.progress + '%';
+                percText.textContent = Math.round(status.progress) + '%';
+                msgText.textContent = status.message;
+
+                if (status.done) {
+                    showResult();
+                } else if (status.message.startsWith("Error")) {
+                    msgText.style.color = "#ff4444";
+                } else {
+                    setTimeout(pollStatus, 1000);
+                }
+            } catch (err) {
+                console.error("Polling error", err);
+                setTimeout(pollStatus, 2000);
+            }
+        }
+
+        function showResult() {
+            progressArea.style.display = 'none';
+            resultArea.style.display = 'flex';
+            
+            player.src = `/view/${taskId}`;
+            downloadBtn.href = `/download/${taskId}`;
+            downloadBtn.download = `analyzed_video.mp4`;
+        }
+
+        // Drop Zone handling
+        const dropZone = document.getElementById('drop-zone');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+            dropZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        dropZone.addEventListener('dragenter', () => dropZone.classList.add('hover'));
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length) {
+                fileInput.files = files;
+                fileNameLabel.textContent = files[0].name;
+                processBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "court_name": "NBA_regulation",
+  "length_m": 28.65,
+  "width_m": 15.24,
+  "manual_corners_pixel": null,
+  "possession_radius_m": 1.5,
+  "fast_break_speed_mps": 6.0,
+  "rotation_pass_threshold": 3,
+  "team_a_prompt": "basketball player wearing light white or yellow jersey",
+  "team_b_prompt": "basketball player wearing dark blue or black jersey",
+  "ball_lost_max_frames": 10,
+  "ball_history_frames": 5,
+  "release_velocity_mps": 12.0,
+  "hand_attach_radius_m": 1.2
+}
