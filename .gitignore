@@ -1,0 +1,6 @@
+*.pt
+*.pth
+*.mp4
+data/
+runs/
+__pycache__/
