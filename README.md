@@ -17,6 +17,17 @@ A high-performance, AI-driven tactical video analysis system for basketball. Fea
 
 ---
 
+## 🛠️ Tech Stack
+
+- **Computer Vision**: `OpenCV`, `YOLOv8` (Ultralytics), `Kalman Filters` (FilterPy)
+- **AI & LLM**: `Google Gemini 1.5 Flash` (AI Commentary), `PyTorch`
+- **Web Framework**: `FastAPI` (Backend), `Jinja2` (Templating)
+- **Video Processing**: `MoviePy`, `FFmpeg`
+- **Data Engineering**: `NumPy`, `SciPy`, `Tqdm`
+- **Frontend**: Vanilla JS/CSS (Premium Dark-Mode UI)
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Installation
